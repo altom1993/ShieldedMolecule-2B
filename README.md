@@ -12,7 +12,7 @@ Place the `pack` folder and `ShieldedMolecule-2B.py` in the same directory. Run 
 - Harmonic trap frequency
 - Microwave detuning and range of Rabi frequency
 
-### 2. Effective Potential:
+### 2. Total Effective Potential:
 Represents the dimensionless differential equation for the radial wave function.
 
 ### 3. Ground State Calculation:
