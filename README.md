@@ -3,7 +3,7 @@ Calculate the angular moment of the ground state of two shielded molecules in tr
 
 ## Usage
 
-Place the `pack` folder and `ShieldedMolecule-2B.py` in the same directory. Run `ShieldedMolecule-2B.py` to calculate the angular momentum of the ground state of the two-body bound state for microwave-shielded molecules in a potential well.
+Place the `pack` folder and `ShieldedMolecule-2B.py` in the same directory. Run `ShieldedMolecule-2B.py` to calculate the angular momentum of the ground state of the two microwave-shielded molecules in a harmonic trap.
 
 ## Program Overview
 
