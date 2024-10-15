@@ -11,7 +11,7 @@ Place the `pack` folder and `ShieldedMolecule-2B.py` in the same directory. Run 
 - d and m: Molecular dipole moment and mass
 - omega_test: Harmonic trap frequency
 - delta_test: Microwave detuning
-- rangeOr: range of the ratio of Rabi frequency and detuning
+- rangeOr: Range of the ratio of Rabi frequency and detuning
 
 ### 2. Total Effective Potential:
 Represents the dimensionless differential equation for the radial wave function.
