@@ -17,6 +17,10 @@ Represents the dimensionless differential equation for the radial wave function.
 
 ### 3. Ground State Calculation:
 Calls `potential1D.py` to compute the ground state wave function and angular momentum.
+- w: 2*pi/w determine the cutoff of rho
+- N: cutoff of the basis
+- spacing: the spacing of the basis
+The results should converge with respect to w, N, and spacing
 
 ## Acknowledgements
 Thanks to Dr. Wang for assistance with the code. This program uses Dr. Wang’s `numerical-1DTISE`, available at [GitHub link](https://github.com/phyer219/numerical-1DTISE/blob/main/examples.ipynb).
