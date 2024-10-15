@@ -21,7 +21,7 @@ Calls `potential1D.py` to compute the ground state wave function and angular mom
 - N: cutoff of the basis
 - spacing: the spacing of the basis
 
-The results should converge with respect to w, N, and spacing
+The results should converge with respect to w, N, and spacing.
 
 ## Acknowledgements
 Thanks to Dr. Wang for assistance with the code. This program uses Dr. Wang’s `numerical-1DTISE`, available at [GitHub link](https://github.com/phyer219/numerical-1DTISE/blob/main/examples.ipynb).
