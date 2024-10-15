@@ -12,7 +12,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-
+### 1. Input Parameters:
 # constant parameters
 eps0 = 8.854187817*10**(-12) # Vacuum permittivity：farad/m
 debye = 3.3356409519815204*10**(-30) # Debye, coulomb*m
@@ -33,7 +33,7 @@ rangeOr = [1/2, 10]
 
 
 
-#%%
+### 2. Total Effective Potential:
 # dimensionless
 length = (debye**2/(4*np.pi*eps0*hbar*Hz))**(1/3)
 
@@ -58,32 +58,30 @@ def h2rho3(omegar,rho):
     f = rho**3
     return np.array([[-a/(12*b), 0, d*np.sqrt(e)/4, -omegar/(6*np.sqrt(2)*b), 0,-np.sqrt(d)*e/4, a/(12*b)],[0, 1/6*(d-3*(1+c)*f), 0, 0, -omegar/(6*c), 0, 0], [d*np.sqrt(e)/4, 0, 1/12*(-d-6*(1+c)*f), np.sqrt(d/2)/(2*c), 0, omegar/(12*c), -d*np.sqrt(e)/4], [-omegar/(6*np.sqrt(2)*b), 0, np.sqrt(d/2)/(2*c), -1/(6*b)-c*f, 0, -np.sqrt(e/2)/(2*c), omegar/(6*np.sqrt(2)*b)], [0, -omegar/(6*c), 0, 0, 1/6*(e-3*(f+3*c*f)), 0, 0], [-np.sqrt(d)*e/4, 0, omegar/(12*c), -np.sqrt(e/2)/(2*c), 0, 1/12*(-e-6*(f+3*c*f)), np.sqrt(d)*e/4], [a/(12*b), 0, -d*np.sqrt(e)/4, omegar/(6*np.sqrt(2)*b), 0, np.sqrt(d)*e/4, 1/12*(-1+1/b-24*c*f)]])
 
-
-
-## define the microwave-shielded potential
+# define the microwave-shielded potential
 def vbo(omegar, delta, rho):
     value, vector= np.linalg.eigh(h2rho3(omegar,rho))
     return Delta0(delta)*1/rho**3*np.max(value)
-## define the gauge potential
+# define the gauge potential
 operator_a = np.diag([0, -1, -2, 0, -1, -2, 0])
 def aphi(omegar, rho):
     value, vector = np.linalg.eigh(h2rho3(omegar,rho))
     index = np.argmax(value)
     vector1 = vector[:,index]
     return 1/rho*(vector1@operator_a@vector1)
-## express the harmonic trap potential
+# express the harmonic trap potential
 def vtrap(delta,omega,rho):
     return rho**2/aomega0(delta, omega)**4
-## express the total potenial
+# express the total potenial
 def veff(m, omegar, delta, omega, rho):
     return (m/rho-aphi(omegar, rho))**2 - 1/(4*rho**2) + vtrap(delta, omega, rho) + vbo(omegar, delta, rho)
 
 
 
-#%%
+### 3. Ground State Calculation:
 from pack.potential1D import Potential1D
 
-def normallizeV(V: callable, w, N, min=0.5, energy_cut=0):
+def normallizeV(V: callable, w, N, spacing, min=0.5, energy_cut=0):
     """
     cut the divergent part of the potential
 
@@ -93,7 +91,7 @@ def normallizeV(V: callable, w, N, min=0.5, energy_cut=0):
     T = 2*np.pi/w
     print('*******************', min)
     if energy_cut == 0:
-        energy_cut = N*w*10
+        energy_cut = N*w*spacing
     print(energy_cut, '========================')
     r0 = root_scalar(lambda x: V(x)-energy_cut, method='bisect', x0=1e-10,
                      bracket=[1e-1, min]).root
@@ -113,39 +111,56 @@ def normallizeV(V: callable, w, N, min=0.5, energy_cut=0):
 
 
 
-# calculate the relative angular momentum for the ground state for different Omega/Delta
+# calculate the relative angular momentum for the ground state for Omega/Delta in listOr
 listOr = np.linspace(rangeOr[0], rangeOr[1], 20)
 listE0 = np.zeros(len(listOr))
 listLz = np.zeros(len(listOr))
 
 for i in range(0,len(listOr)):
+    """
+    calculate the relative angular momentum for the ground state for Omega/Delta in listOr
+    
+    w: 2*pi/w determine the cutoff of rho
+    N: cutoff of the basis
+    spacing: the spacing of the basis
+    levels: number of bound state to be calculated for each m_can. Here, m_can is the z-component of the canonical angular moment
+    """
+    
+    """
+    vtotal0: Total potenial for m_can=0
+    p3d0: Numercical results of the bound state for relative motion in the potential 'vtotal0'
+    vals0: energy of the lowest bound state with m_can=0
+    similiar for vtotaln1, p3dn1, and valsn1 corresponding to m_can=-1
+    """
+    
     Or = listOr[i]
     
     w = 2 # determine the cutoff of rho
     N = 601 # N determine the cutoff of the basis
+    spacing = 10 # = 
     levels = 1 # number of bound state to be calculated
 
-    def vtotal0(rho): # total potenial for m=0
+    def vtotal0(rho):
         return veff(0, Or, delta_test, omega_test, rho)
-    def vtotaln1(rho): # total potenial for m=-1
+    def vtotaln1(rho):
         return veff(-1, Or, delta_test, omega_test, rho)
 
-    nV0, points0 = normallizeV(lambda r: vtotal0(rho=r), w=w, N=N)
-    nVn1, pointsn1 = normallizeV(lambda r: vtotaln1(rho=r), w=w, N=N)
+    nV0, points0 = normallizeV(lambda r: vtotal0(rho=r), w=w, N=N, spacing=spacing)
+    nVn1, pointsn1 = normallizeV(lambda r: vtotaln1(rho=r), w=w, N=N, spacing=spacing)
 
-    p3d0 = Potential1D(V=lambda x:nV0(x), N=N, w=w, verbose=1, points=points0, zero='left')# Numercically solve the bound state and the eigen wave functions for relative motion in the potential vtotal0.
-    p3dn1 = Potential1D(V=lambda x:nVn1(x), N=N, w=w, verbose=1, points=pointsn1, zero='left')# Numercically solve the bound state and the eigen wave functions for relative motion in the potential vtotaln1.
+    p3d0 = Potential1D(V=lambda x:nV0(x), N=N, w=w, verbose=1, points=points0, zero='left')
+    p3dn1 = Potential1D(V=lambda x:nVn1(x), N=N, w=w, verbose=1, points=pointsn1, zero='left')
     
-    vals0 = p3d0.get_eigenvals(levels=levels) # energy of the lowest bound state for m=0
-    valsn1 = p3dn1.get_eigenvals(levels=levels) # energy of the lowest bound state for m=-1
+    vals0 = p3d0.get_eigenvals(levels=levels)
+    valsn1 = p3dn1.get_eigenvals(levels=levels)
     
     listrho = np.linspace(0, 2*np.pi/w, 1000)
     listaphi_0 = np.array([listrho[i]*aphi(Or, listrho[i]) for i in range(1, len(listrho))]) # list of A_phi
-    listaphi = np.insert(listaphi_0, 0, 0) # A_phi(rho) is singular at rho=0. here, we simply take rho*A(rho)=0 at rho=0, and this affect barely the result of Lz, since the wave funtion at rho=0 is zero.
+    listaphi = np.insert(listaphi_0, 0, 0) # A_phi(rho) is singular at rho=0. here, we simply take rho*A(rho)=0 at rho=0, and this does not affect the result of Lz, since the wave funtion at rho=0 is zero.
 
-    if vals0 < valsn1: # determine which is the bound state, m=0 or -1.
-        wf = p3d0.get_eigenwf()
-        Lz = -1*simps(wf[0]*wf[0]*listaphi, listrho) # calculate the relative angular momentum for the ground state.
+    if vals0 < valsn1: # determine which is the ground state, m_can=0 or -1.
+        wf = p3d0.get_eigenwf() # wave function
+        Lz = -1*simps(wf[0]*wf[0]*listaphi, listrho) # relative angular momentum
     else:
         wf = p3dn1.get_eigenwf()
         Lz = -1 - 1*simps(wf[0]*wf[0]*listaphi, listrho)
