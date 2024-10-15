@@ -20,6 +20,7 @@ Calls `potential1D.py` to compute the ground state wave function and angular mom
 - w: 2*pi/w determine the cutoff of rho
 - N: cutoff of the basis
 - spacing: the spacing of the basis
+
 The results should converge with respect to w, N, and spacing
 
 ## Acknowledgements
